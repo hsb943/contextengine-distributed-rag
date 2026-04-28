@@ -1,22 +1,16 @@
-import hashlib
 from typing import List
 
-EMBEDDING_DIMENSION = 128
+from sentence_transformers import SentenceTransformer
 
+EMBEDDING_MODEL_NAME = "BAAI/bge-small-en-v1.5"
+_MODEL = SentenceTransformer(EMBEDDING_MODEL_NAME, device="cpu")
+EMBEDDING_DIMENSION = _MODEL.get_embedding_dimension()
 
 def embed_text(text: str) -> List[float]:
-    """Return a deterministic fake embedding vector for text.
+    """Embed text with a shared sentence-transformers model.
 
-    This placeholder expands SHA-256 digests into a stable 128-dimensional
-    vector and avoids any external model dependency.
+    Embeddings are normalized so they work well with cosine similarity in
+    Qdrant. The model is loaded once at module import time and reused.
     """
-    values: List[float] = []
-    counter = 0
-
-    while len(values) < EMBEDDING_DIMENSION:
-        seed = f"{counter}:{text}".encode("utf-8")
-        digest = hashlib.sha256(seed).digest()
-        values.extend(round(byte / 255.0, 6) for byte in digest)
-        counter += 1
-
-    return values[:EMBEDDING_DIMENSION]
+    embedding = _MODEL.encode(text, normalize_embeddings=True)
+    return embedding.tolist()
