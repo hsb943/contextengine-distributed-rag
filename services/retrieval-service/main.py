@@ -1,7 +1,8 @@
 import importlib.util
 import sys
+from collections import defaultdict
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
@@ -11,6 +12,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from core.embeddings import embed_text
+from core.reranking import rerank
 
 app = FastAPI(title="Retrieval Service")
 
@@ -60,8 +62,30 @@ def health() -> dict[str, str]:
 
 @app.post("/search", response_model=SearchResponse)
 def search(request: SearchRequest) -> SearchResponse:
-    """Embed the query, search Qdrant, and return matching chunks."""
+    """Embed the query, search Qdrant, rerank results, and return matches."""
     query_vector = embed_text(request.query)
-    matches = search_chunks(query_vector, request.top_k)
-    results = [SearchResultItem(**match) for match in matches]
+    candidate_limit = max(10, request.top_k)
+    matches = search_chunks(query_vector, candidate_limit)
+
+    ranked_documents = rerank(
+        request.query,
+        [match["text"] for match in matches],
+    )
+
+    matches_by_text: dict[str, list[dict]] = defaultdict(list)
+    for match in matches:
+        matches_by_text[match["text"]].append(match)
+
+    results = []
+    for text, score in ranked_documents[: request.top_k]:
+        match = matches_by_text[text].pop(0)
+        results.append(
+            SearchResultItem(
+                chunk_id=match["chunk_id"],
+                document_id=match["document_id"],
+                text=match["text"],
+                score=score,
+            )
+        )
+
     return SearchResponse(query=request.query, results=results)
