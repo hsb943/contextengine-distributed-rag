@@ -1,9 +1,14 @@
 import importlib.util
+import sys
 from pathlib import Path
 from typing import Callable
 
 from fastapi import FastAPI
 from pydantic import BaseModel
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 from core.chunking import chunk_text
 from core.embeddings import embed_text
@@ -38,8 +43,7 @@ class IngestResponse(BaseModel):
 
 def load_store_chunks() -> Callable[[list[dict]], int]:
     """Load Qdrant storage from the infrastructure layer."""
-    project_root = Path(__file__).resolve().parents[2]
-    module_path = project_root / "infrastructure" / "vector-db" / "qdrant_client.py"
+    module_path = PROJECT_ROOT / "infrastructure" / "vector-db" / "qdrant_client.py"
     spec = importlib.util.spec_from_file_location("qdrant_vector_client", module_path)
     if spec is None or spec.loader is None:
         raise RuntimeError("Unable to load Qdrant infrastructure module.")
