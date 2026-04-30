@@ -73,15 +73,18 @@ def log_collection() -> None:
 def search(request: SearchRequest) -> SearchResponse:
     """Embed the query, search Qdrant, rerank results, and return matches."""
     query_vector = embed_text(request.query)
-    candidate_limit = max(10, request.top_k)
+    candidate_limit = max(50, request.top_k)
     if not request.document_id:
         LOGGER.warning("Search request received without document_id filter.")
     matches = search_chunks(query_vector, candidate_limit, request.document_id)
+    LOGGER.info("Retrieval candidates: %d", candidate_limit)
+    LOGGER.info("Candidates retrieved: %d", len(matches))
 
     ranked_documents = rerank(
         request.query,
         [match["text"] for match in matches],
     )
+    LOGGER.info("Reranker input: %d", len(matches))
 
     matches_by_text: dict[str, list[dict]] = defaultdict(list)
     for match in matches:
@@ -99,4 +102,5 @@ def search(request: SearchRequest) -> SearchResponse:
             )
         )
 
+    LOGGER.info("Final results: %d", len(results))
     return SearchResponse(query=request.query, results=results)

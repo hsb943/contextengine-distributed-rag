@@ -34,7 +34,7 @@ class AnswerRequest(BaseModel):
     """Answer generation request."""
 
     query: str
-    top_k: int = Field(default=3, ge=1)
+    top_k: int = Field(default=3, ge=1, le=10)
     document_id: str
 
 
