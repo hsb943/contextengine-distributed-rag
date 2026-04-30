@@ -35,6 +35,7 @@ class AnswerRequest(BaseModel):
 
     query: str
     top_k: int = Field(default=3, ge=1)
+    document_id: str
 
 
 class SourceItem(BaseModel):
@@ -53,9 +54,11 @@ class AnswerResponse(BaseModel):
     sources: list[SourceItem]
 
 
-def fetch_retrieval_results(query: str, top_k: int) -> list[dict]:
+def fetch_retrieval_results(query: str, top_k: int, document_id: str) -> list[dict]:
     """Call the retrieval service and return top results."""
-    payload = json.dumps({"query": query, "top_k": top_k}).encode("utf-8")
+    payload = json.dumps(
+        {"query": query, "top_k": top_k, "document_id": document_id}
+    ).encode("utf-8")
     http_request = request.Request(
         RETRIEVAL_SERVICE_URL,
         data=payload,
@@ -105,8 +108,15 @@ def health() -> dict[str, str]:
 @app.post("/answer", response_model=AnswerResponse)
 def answer(request_data: AnswerRequest) -> AnswerResponse:
     """Retrieve supporting chunks and generate a final answer."""
+    if not request_data.document_id.strip():
+        raise HTTPException(status_code=400, detail="document_id is required.")
+
     try:
-        results = fetch_retrieval_results(request_data.query, request_data.top_k)
+        results = fetch_retrieval_results(
+            request_data.query,
+            request_data.top_k,
+            request_data.document_id,
+        )
         context = build_context(results)
         answer_text = generate_answer(request_data.query, context)
     except RuntimeError as exc:

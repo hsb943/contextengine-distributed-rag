@@ -1,4 +1,5 @@
 import importlib.util
+import logging
 import sys
 from collections import defaultdict
 from collections.abc import Callable
@@ -12,9 +13,11 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from core.embeddings import embed_text
+from infrastructure.config import COLLECTION_NAME
 from core.reranking import rerank
 
 app = FastAPI(title="Retrieval Service")
+LOGGER = logging.getLogger(__name__)
 
 
 class SearchRequest(BaseModel):
@@ -22,6 +25,7 @@ class SearchRequest(BaseModel):
 
     query: str
     top_k: int = Field(default=5, ge=1)
+    document_id: str | None = None
 
 
 class SearchResultItem(BaseModel):
@@ -40,7 +44,7 @@ class SearchResponse(BaseModel):
     results: list[SearchResultItem]
 
 
-def load_search_chunks() -> Callable[[list[float], int], list[dict]]:
+def load_search_chunks() -> Callable[[list[float], int, str | None], list[dict]]:
     """Load Qdrant search logic from the infrastructure layer."""
     module_path = PROJECT_ROOT / "infrastructure" / "vector-db" / "qdrant_client.py"
     spec = importlib.util.spec_from_file_location("qdrant_vector_client", module_path)
@@ -60,12 +64,19 @@ def health() -> dict[str, str]:
     return {"status": "ok", "service": "retrieval-service"}
 
 
+@app.on_event("startup")
+def log_collection() -> None:
+    LOGGER.info("Using Qdrant collection: %s", COLLECTION_NAME)
+
+
 @app.post("/search", response_model=SearchResponse)
 def search(request: SearchRequest) -> SearchResponse:
     """Embed the query, search Qdrant, rerank results, and return matches."""
     query_vector = embed_text(request.query)
     candidate_limit = max(10, request.top_k)
-    matches = search_chunks(query_vector, candidate_limit)
+    if not request.document_id:
+        LOGGER.warning("Search request received without document_id filter.")
+    matches = search_chunks(query_vector, candidate_limit, request.document_id)
 
     ranked_documents = rerank(
         request.query,

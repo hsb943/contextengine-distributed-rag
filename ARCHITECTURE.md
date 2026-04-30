@@ -1,81 +1,93 @@
-# RAG System Architecture
+# 🌐 Global RAG System Architecture
 
 ## 🧠 Overview
 
-This system is a **Retrieval-Augmented Generation (RAG) pipeline** designed to answer user queries using private or domain-specific documents.
+This system is a **Global Retrieval-Augmented Generation (RAG) platform** designed to support **continuous document ingestion** and **independent querying across the entire knowledge base**.
 
-It is built as a **modular, service-oriented architecture** where each component has a clear responsibility and can scale independently.
+Unlike traditional "chat with document" systems, this architecture enables:
+
+* Upload once → query anytime
+* No dependency between ingestion and querying
+* Organization-wide knowledge search (e.g., legal, finance, enterprise)
 
 ---
 
 ## 🎯 Core Goals
 
-* Decouple ingestion, retrieval, and generation
-* Enable independent scaling (CPU vs GPU workloads)
-* Allow easy swapping of models (embeddings, reranker, LLM)
-* Support future production features (autoscaling, multi-tenancy, connectors)
+* Decouple ingestion and querying completely
+* Support **global semantic search across all documents**
+* Maintain high retrieval accuracy using reranking
+* Enable scalable, production-ready architecture
+* Allow optional filtering (not mandatory)
 
 ---
 
 ## 🧩 High-Level Architecture
 
 ```
-User
- │
- ▼
-API Gateway
- │
- ├── Query Flow ───────────────────────────────┐
- │                                            ▼
- │                                   Retrieval Service
- │                                            │
- │                                    Vector Database
- │                                            │
- │                                            ▼
- │                                      Reranker
- │                                            │
- │                                            ▼
- │                                       LLM Service
- │                                            │
- │                                            ▼
- │                                         Response
- │
- └── Ingestion Flow ──────────────────────────┐
-                                              ▼
-                                      Ingestion Service
-                                              │
-                              Parsing → Chunking → Embedding
-                                              │
-                                              ▼
-                                       Vector Database
+                ┌─────────────────────┐
+                │   Ingestion Flow    │
+                └────────┬────────────┘
+                         ▼
+                Ingestion Service
+                         │
+         Parsing → Chunking → Embedding
+                         │
+                         ▼
+                ┌─────────────────────┐
+                │   Vector Database   │
+                │     (Qdrant)        │
+                └────────┬────────────┘
+                         │
+                         ▼
+                ┌─────────────────────┐
+                │   Retrieval Flow    │
+                └────────┬────────────┘
+                         ▼
+                Retrieval Service
+                         │
+           High-Recall Vector Search
+                         │
+                         ▼
+                     Reranker
+                         │
+                         ▼
+                    LLM Service
+                         │
+                         ▼
+                      Response
 ```
 
 ---
 
 ## 🔁 Core Flows
 
-### 1. Query Flow (User → Answer)
+---
 
-1. User sends query via API Gateway
-2. Query is forwarded to Retrieval Service
-3. Query is embedded using embedding model
-4. Vector DB returns top-K similar chunks
-5. Reranker reorders results for relevance
-6. Top chunks are sent to LLM Service
-7. LLM generates final answer
-8. Response returned to user
+### 1. Query Flow (Global Search)
+
+1. User sends query
+2. Retrieval Service embeds query
+3. Vector DB returns **top 30–50 candidate chunks**
+4. Reranker selects **top 5–10 most relevant chunks**
+5. LLM generates answer using selected context
+6. Response returned with sources
+
+> ⚠️ No document selection required
 
 ---
 
-### 2. Ingestion Flow (Documents → Knowledge Base)
+### 2. Ingestion Flow (Continuous Knowledge Update)
 
-1. User uploads document (UI/API)
-2. Ingestion Service processes document:
+1. Documents are uploaded via API/UI
+
+2. Ingestion Service processes:
 
    * Parsing (PDF/DOCX → text)
-   * Chunking (split into smaller units)
-   * Embedding (text → vectors)
-3. Chunks + metadata stored in Vector DB
+   * Chunking (semantic / paragraph-based)
+   * Embedding (batched)
+
+3. Chunks stored in Vector DB with metadata
 
 ---
 
@@ -88,8 +100,11 @@ API Gateway
 **Responsibilities:**
 
 * Entry point for all requests
-* Routes `/query` and `/upload`
-* Handles authentication (future)
+* Routes:
+
+  * `/ingest`
+  * `/query`
+* Handles auth (future)
 
 ---
 
@@ -98,14 +113,15 @@ API Gateway
 **Responsibilities:**
 
 * Document parsing
-* Chunking strategy
-* Embedding generation
+* Smart chunking (semantic / structure-aware)
+* Batch embedding
+* Metadata enrichment
 * Indexing into vector DB
 
 **Notes:**
 
-* Can be async / batch-based
-* Scales horizontally on CPU nodes
+* Can run async / batch jobs
+* Designed for continuous ingestion
 
 ---
 
@@ -114,18 +130,30 @@ API Gateway
 **Responsibilities:**
 
 * Query embedding
-* Vector similarity search
-* Metadata filtering
-* Reranking
+* High-recall vector search (top_k = 30–50)
+* Optional metadata filtering
+* Passing candidates to reranker
 
-**Notes:**
+**Modes:**
 
-* Critical for answer quality
-* Should remain independent from LLM
+```text
+Global Mode (default) → search entire DB
+Filtered Mode         → search within subset (optional)
+```
 
 ---
 
-### 🤖 LLM Service (GPU-bound)
+### 🧹 Reranker (Critical Component)
+
+**Responsibilities:**
+
+* Re-rank retrieved candidates using cross-encoder
+* Reduce noise from global search
+* Output top 5–10 chunks
+
+---
+
+### 🤖 LLM Service (GPU / API)
 
 **Responsibilities:**
 
@@ -133,29 +161,42 @@ API Gateway
 * Context injection
 * Answer generation
 
-**Notes:**
+**Constraints:**
 
-* Uses vLLM or external API
-* Main latency + cost driver
-* Scales on GPU nodes
+* Must answer only from retrieved context
+* Must avoid hallucination
 
 ---
 
-### 🗄️ Vector Database
-
-**Options:**
-
-* Qdrant (recommended)
-* FAISS (local/dev)
+### 🗄️ Vector Database (Qdrant)
 
 **Stores:**
 
-* embeddings
-* metadata (source, page, timestamp)
+* Embeddings
+* Metadata payload
+* Chunk text
 
 ---
 
-## 🧠 Core Modules (Reusable Logic)
+## 🧾 Metadata Design (Important)
+
+Each chunk should include:
+
+```json
+{
+  "document_id": "...",
+  "doc_type": "contract | case_law | policy",
+  "jurisdiction": "india",
+  "source": "pdf",
+  "section": "optional",
+  "created_at": "...",
+  "text": "..."
+}
+```
+
+---
+
+## 🧠 Core Modules (Reusable)
 
 Located in `/core`
 
@@ -163,31 +204,33 @@ Located in `/core`
 
 ### ✂️ chunking/
 
-* Fixed chunking
 * Recursive chunking
-* Semantic chunking (future)
+* Paragraph-based splitting
+* Overlap support
 
 ---
 
 ### 🔗 embeddings/
 
-* Embedding model wrappers
-* Query vs document formatting
+* Batch embedding
+* Model abstraction
+* Query vs document embedding handling
 
 ---
 
 ### 🧹 reranking/
 
-* Cross-encoder rerankers
+* Cross-encoder models
 * Score normalization
+* Top-K reduction
 
 ---
 
 ### 🧾 prompts/
 
-* Prompt templates
-* System instructions
+* Strict grounding prompts
 * Context formatting
+* Instruction templates
 
 ---
 
@@ -201,15 +244,15 @@ Located in `/infrastructure`
 
 * Qdrant client
 * Index management
-* CRUD operations
+* Search + filtering logic
 
 ---
 
 ### ⚙️ config/
 
 * Model configs
+* Feature flags (global vs filtered mode)
 * Environment variables
-* Feature flags
 
 ---
 
@@ -218,80 +261,70 @@ Located in `/infrastructure`
 Located in `/scripts`
 
 * `ingest_batch.py` → bulk ingestion
-* `reindex.py` → re-embedding / updates
+* `reindex.py` → re-embedding
+* `evaluate.py` → retrieval + answer evaluation
 
 ---
 
-## 🚀 Scaling Strategy (Future)
+## 🔍 Retrieval Strategy (Key Difference)
 
----
-
-### Horizontal Scaling
-
-| Component         | Scaling Type |
-| ----------------- | ------------ |
-| Ingestion Service | CPU scaling  |
-| Retrieval Service | CPU scaling  |
-| LLM Service       | GPU scaling  |
-
----
-
-### Autoscaling (Kubernetes)
-
-* HPA for ingestion/retrieval
-* GPU autoscaling for LLM
-* Queue-based scaling (Ray / Kafka optional)
-
----
-
-## 🔥 Design Principles
-
-1. **Separation of Concerns**
-
-   * Ingestion ≠ Retrieval ≠ Generation
-
-2. **Stateless Services**
-
-   * Easier scaling and deployment
-
-3. **Pluggable Models**
-
-   * Swap embeddings/LLM without rewriting system
-
-4. **Data-Centric Design**
-
-   * Retrieval quality > model size
+```text
+1. Retrieve top 30–50 chunks (high recall)
+2. Rerank results
+3. Select top 5–10
+4. Send to LLM
+```
 
 ---
 
 ## ⚠️ Known Challenges
 
-* Chunking strategy impacts retrieval quality
-* Embedding choice affects recall
-* Reranker adds latency but improves precision
-* LLM cost dominates system cost
+* Global search introduces noise
+* Chunk quality directly impacts retrieval
+* Reranker adds latency
+* Large datasets require tuning
 
 ---
 
-## 🧠 Future Enhancements
+## 🚀 Future Enhancements
 
-* Hybrid search (BM25 + dense)
-* Multi-LLM routing
+* Hybrid search (BM25 + vector)
 * Query classification
-* Feedback loop / evaluation pipeline
-* Connectors (Google Drive, Slack, etc.)
-* Multi-tenant support
+* Domain-aware routing
+* Feedback loops / evaluation pipeline
+* Multi-tenant filtering (user_id)
+* Streaming responses
+* Caching layer
+
+---
+
+## 🔥 Design Principles
+
+1. **Global-first Retrieval**
+
+   * Query entire knowledge base by default
+
+2. **Separation of Concerns**
+
+   * Ingestion ≠ Retrieval ≠ Generation
+
+3. **Data-Centric Design**
+
+   * Retrieval quality > model size
+
+4. **Pluggability**
+
+   * Swap models without system rewrite
 
 ---
 
 ## 🧾 Summary
 
-This system follows a **modular RAG architecture** where:
+This system is a **global knowledge retrieval platform** where:
 
-* Knowledge is stored externally (vector DB)
-* Retrieval is optimized before generation
-* LLM is used only for reasoning, not memory
+* Documents are continuously ingested
+* Queries are independent of uploads
+* Retrieval is optimized for recall + precision
+* LLM is used for reasoning, not storage
 
 > The intelligence of the system depends more on retrieval quality than model size.
-
----

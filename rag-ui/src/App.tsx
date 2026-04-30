@@ -58,7 +58,7 @@ function App() {
   }
 
   const handleAsk = async () => {
-    if (!query.trim()) {
+    if (!documentId || !query.trim()) {
       return
     }
 
@@ -76,6 +76,7 @@ function App() {
         body: JSON.stringify({
           query,
           top_k: 3,
+          document_id: documentId,
         }),
       })
 
@@ -116,9 +117,9 @@ function App() {
             statusMessage={statusMessage}
           />
 
-        <QuerySection
-          documentId={documentId}
-          loading={loading}
+          <QuerySection
+            documentId={documentId}
+            loading={loading}
             query={query}
             onQueryChange={setQuery}
             onSubmit={handleAsk}

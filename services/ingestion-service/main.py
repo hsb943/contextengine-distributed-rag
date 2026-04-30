@@ -1,4 +1,5 @@
 import importlib.util
+import logging
 import sys
 from pathlib import Path
 from typing import Callable
@@ -14,7 +15,10 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from core.chunking import chunk_text
 from core.embeddings import embed_text
+from infrastructure.config import COLLECTION_NAME
 from utils.pdf_parser import extract_text_from_pdf
+
+LOGGER = logging.getLogger(__name__)
 
 app = FastAPI(title="Ingestion Service")
 app.add_middleware(
@@ -39,6 +43,7 @@ class IngestedChunk(BaseModel):
     chunk_id: str
     document_id: str
     text: str
+    source: str
     chunk_index: int
     embedding: list[float]
 
@@ -78,18 +83,33 @@ def health() -> dict[str, str]:
     return {"status": "ok", "service": "ingestion-service"}
 
 
-def ingest_document(document_id: str, text: str) -> IngestResponse:
+@app.on_event("startup")
+def log_collection() -> None:
+    LOGGER.info("Using Qdrant collection: %s", COLLECTION_NAME)
+
+
+def ingest_document(document_id: str, text: str, source: str) -> IngestResponse:
     """Run the shared text ingestion pipeline for one document."""
     chunks = [
         IngestedChunk(
             chunk_id=f"{document_id}_{index}",
             document_id=document_id,
             text=chunk,
+            source=source,
             chunk_index=index,
             embedding=embed_text(chunk),
         )
         for index, chunk in enumerate(chunk_text(text), start=1)
     ]
+
+    if chunks:
+        average_size = sum(len(chunk.text.split()) for chunk in chunks) / len(chunks)
+        LOGGER.info(
+            "Chunked document %s into %d chunks (avg %.1f words)",
+            document_id,
+            len(chunks),
+            average_size,
+        )
 
     stored_count = store_chunks([model_to_dict(chunk) for chunk in chunks])
 
@@ -106,7 +126,7 @@ def ingest(request: IngestRequest) -> IngestResponse:
     if not request.text.strip():
         raise HTTPException(status_code=400, detail="Text input is empty.")
 
-    return ingest_document(request.document_id, request.text)
+    return ingest_document(request.document_id, request.text, source="text")
 
 
 @app.post("/ingest/file", response_model=IngestResponse)
@@ -129,4 +149,4 @@ def ingest_file(file: UploadFile = File(...)) -> IngestResponse:
         raise HTTPException(status_code=400, detail="No extractable text found in PDF.")
 
     document_id = Path(filename).stem or str(uuid4())
-    return ingest_document(document_id, text)
+    return ingest_document(document_id, text, source="pdf")

@@ -32,7 +32,7 @@ export function QuerySection({
 
       <button
         className="primary-button"
-        disabled={!query.trim() || loading}
+        disabled={!documentId || !query.trim() || loading}
         type="button"
         onClick={onSubmit}
       >
@@ -41,8 +41,8 @@ export function QuerySection({
 
       <p className="status-text">
         {documentId
-          ? `Active document: ${documentId}. You can also ask across previously stored documents.`
-          : 'Ask against the stored knowledge base, or upload a fresh PDF first.'}
+          ? `Active document: ${documentId}`
+          : 'Upload a PDF before asking a question.'}
       </p>
     </section>
   )
