@@ -5,6 +5,7 @@ from pathlib import Path
 from urllib import error, request
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -20,6 +21,13 @@ RETRIEVAL_SERVICE_URL = os.getenv(
 MAX_CONTEXT_CHARS = 4000
 
 app = FastAPI(title="LLM Service")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class AnswerRequest(BaseModel):
