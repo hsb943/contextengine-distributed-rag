@@ -14,7 +14,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from core.chunking import chunk_text
-from core.embeddings import embed_text
+from core.embeddings import embed_batch
 from infrastructure.config import COLLECTION_NAME
 from utils.pdf_parser import extract_text_from_pdf
 
@@ -90,6 +90,8 @@ def log_collection() -> None:
 
 def ingest_document(document_id: str, text: str, source: str) -> IngestResponse:
     """Run the shared text ingestion pipeline for one document."""
+    chunk_texts = chunk_text(text)
+    embeddings = embed_batch(chunk_texts)
     chunks = [
         IngestedChunk(
             chunk_id=f"{document_id}_{index}",
@@ -97,9 +99,9 @@ def ingest_document(document_id: str, text: str, source: str) -> IngestResponse:
             text=chunk,
             source=source,
             chunk_index=index,
-            embedding=embed_text(chunk),
+            embedding=embedding,
         )
-        for index, chunk in enumerate(chunk_text(text), start=1)
+        for index, (chunk, embedding) in enumerate(zip(chunk_texts, embeddings), start=1)
     ]
 
     if chunks:
