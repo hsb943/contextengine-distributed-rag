@@ -58,7 +58,7 @@ function App() {
   }
 
   const handleAsk = async () => {
-    if (!documentId || !query.trim()) {
+    if (!query.trim()) {
       return
     }
 
@@ -68,16 +68,21 @@ function App() {
     setSources([])
 
     try {
+      const payload: Record<string, unknown> = {
+        query,
+        top_k: 5,
+      }
+
+      if (documentId) {
+        payload.document_id = documentId
+      }
+
       const response = await fetch('http://localhost:8002/answer', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          query,
-          top_k: 3,
-          document_id: documentId,
-        }),
+        body: JSON.stringify(payload),
       })
 
       if (!response.ok) {
@@ -118,7 +123,6 @@ function App() {
           />
 
           <QuerySection
-            documentId={documentId}
             loading={loading}
             query={query}
             onQueryChange={setQuery}

@@ -23,6 +23,7 @@ class ChunkRecord(TypedDict):
 
     chunk_id: str
     document_id: str
+    doc_type: str | None
     text: str
     source: str
     chunk_index: int
@@ -72,6 +73,7 @@ def store_chunks(chunks: Iterable[ChunkRecord]) -> int:
             vector=chunk["embedding"],
             payload={
                 "document_id": chunk["document_id"],
+                "doc_type": chunk.get("doc_type", None),
                 "chunk_id": chunk["chunk_id"],
                 "text": chunk["text"],
                 "source": chunk["source"],
@@ -91,7 +93,7 @@ def store_chunks(chunks: Iterable[ChunkRecord]) -> int:
 def search_chunks(
     query_vector: List[float],
     top_k: int,
-    document_id: str | None = None,
+    query_filter: Filter | None = None,
 ) -> List[SearchResult]:
     """Search Qdrant for the most similar chunks."""
     if top_k <= 0:
@@ -103,18 +105,8 @@ def search_chunks(
     if client.count(collection_name=COLLECTION_NAME).count == 0:
         return []
 
-    query_filter = None
-    if document_id:
-        query_filter = Filter(
-            must=[
-                FieldCondition(
-                    key="document_id",
-                    match=MatchValue(value=document_id),
-                )
-            ]
-        )
-    else:
-        LOGGER.warning("Running retrieval without document_id filter.")
+    if query_filter is None:
+        LOGGER.warning("Running retrieval without metadata filters.")
 
     response = client.query_points(
         collection_name=COLLECTION_NAME,

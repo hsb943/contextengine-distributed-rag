@@ -16,6 +16,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from core.chunking import chunk_text
 from core.embeddings import embed_batch
 from infrastructure.config import COLLECTION_NAME
+from core.text_cleaning import clean_ocr_text
 from utils.pdf_parser import extract_text_from_pdf
 
 LOGGER = logging.getLogger(__name__)
@@ -42,6 +43,7 @@ class IngestedChunk(BaseModel):
 
     chunk_id: str
     document_id: str
+    doc_type: str | None = None
     text: str
     source: str
     chunk_index: int
@@ -88,14 +90,21 @@ def log_collection() -> None:
     LOGGER.info("Using Qdrant collection: %s", COLLECTION_NAME)
 
 
-def ingest_document(document_id: str, text: str, source: str) -> IngestResponse:
+def ingest_document(
+    document_id: str,
+    text: str,
+    source: str,
+    doc_type: str | None = None,
+) -> IngestResponse:
     """Run the shared text ingestion pipeline for one document."""
-    chunk_texts = chunk_text(text)
+    cleaned_text = clean_ocr_text(text)
+    chunk_texts = chunk_text(cleaned_text)
     embeddings = embed_batch(chunk_texts)
     chunks = [
         IngestedChunk(
             chunk_id=f"{document_id}_{index}",
             document_id=document_id,
+            doc_type=doc_type,
             text=chunk,
             source=source,
             chunk_index=index,

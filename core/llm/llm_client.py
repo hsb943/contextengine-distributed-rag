@@ -2,11 +2,16 @@ import json
 import os
 from urllib import error, request
 
-DEFAULT_LLM_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+DEFAULT_LLM_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o")
 DEFAULT_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
 SYSTEM_PROMPT = (
-    "You are a helpful assistant. Answer the question using ONLY the provided "
-    "context. If the answer is not in the context, say 'I don't know'."
+    "You are a helpful assistant. Answer the question using the provided "
+    "context as your primary evidence. If the context contains the answer, "
+    "give a direct answer even if the text is messy or OCR-like. If the answer "
+    "is genuinely not supported by the context, say 'I don't know'. "
+    "If the user asks for a list, syllabus, modules, topics, summary, or other "
+    "structured output, combine evidence from multiple chunks and answer in "
+    "clear bullet points or a compact structured format."
 )
 
 

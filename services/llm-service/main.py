@@ -13,12 +13,13 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from core.llm import generate_answer
+from core.text_cleaning import clean_ocr_text
 
 RETRIEVAL_SERVICE_URL = os.getenv(
     "RETRIEVAL_SERVICE_URL",
     "http://127.0.0.1:8001/search",
 )
-MAX_CONTEXT_CHARS = 4000
+MAX_CONTEXT_CHARS = 8000
 
 app = FastAPI(title="LLM Service")
 app.add_middleware(
@@ -34,8 +35,8 @@ class AnswerRequest(BaseModel):
     """Answer generation request."""
 
     query: str
-    top_k: int = Field(default=3, ge=1, le=10)
-    document_id: str
+    top_k: int = Field(default=5, ge=1, le=10)
+    document_id: str | None = None
 
 
 class SourceItem(BaseModel):
@@ -54,11 +55,17 @@ class AnswerResponse(BaseModel):
     sources: list[SourceItem]
 
 
-def fetch_retrieval_results(query: str, top_k: int, document_id: str) -> list[dict]:
+def fetch_retrieval_results(
+    query: str,
+    top_k: int,
+    document_id: str | None = None,
+) -> list[dict]:
     """Call the retrieval service and return top results."""
-    payload = json.dumps(
-        {"query": query, "top_k": top_k, "document_id": document_id}
-    ).encode("utf-8")
+    payload_data: dict[str, object] = {"query": query, "top_k": top_k}
+    if document_id:
+        payload_data["document_id"] = document_id
+
+    payload = json.dumps(payload_data).encode("utf-8")
     http_request = request.Request(
         RETRIEVAL_SERVICE_URL,
         data=payload,
@@ -84,11 +91,12 @@ def build_context(sources: list[dict]) -> str:
     total_chars = 0
 
     for index, source in enumerate(sources, start=1):
+        cleaned_text = clean_ocr_text(source["text"])
         section = (
             f"[Source {index}]\n"
             f"Document ID: {source['document_id']}\n"
             f"Chunk ID: {source['chunk_id']}\n"
-            f"Text: {source['text']}"
+            f"Text: {cleaned_text}"
         )
         projected = total_chars + len(section) + 2
         if sections and projected > MAX_CONTEXT_CHARS:
@@ -108,9 +116,6 @@ def health() -> dict[str, str]:
 @app.post("/answer", response_model=AnswerResponse)
 def answer(request_data: AnswerRequest) -> AnswerResponse:
     """Retrieve supporting chunks and generate a final answer."""
-    if not request_data.document_id.strip():
-        raise HTTPException(status_code=400, detail="document_id is required.")
-
     try:
         results = fetch_retrieval_results(
             request_data.query,

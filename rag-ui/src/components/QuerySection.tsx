@@ -1,5 +1,4 @@
 type QuerySectionProps = {
-  documentId: string | null
   loading: boolean
   query: string
   onQueryChange: (query: string) => void
@@ -7,7 +6,6 @@ type QuerySectionProps = {
 }
 
 export function QuerySection({
-  documentId,
   loading,
   query,
   onQueryChange,
@@ -32,7 +30,7 @@ export function QuerySection({
 
       <button
         className="primary-button"
-        disabled={!documentId || !query.trim() || loading}
+        disabled={!query.trim() || loading}
         type="button"
         onClick={onSubmit}
       >
@@ -40,9 +38,7 @@ export function QuerySection({
       </button>
 
       <p className="status-text">
-        {documentId
-          ? `Active document: ${documentId}`
-          : 'Upload a PDF before asking a question.'}
+        Ask against the stored knowledge base, or upload a fresh PDF first.
       </p>
     </section>
   )
