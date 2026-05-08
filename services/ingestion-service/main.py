@@ -1,8 +1,6 @@
-import importlib.util
 import logging
 import sys
 from pathlib import Path
-from typing import Callable
 from uuid import uuid4
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
@@ -13,10 +11,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from core.chunking import chunk_text
-from core.embeddings import embed_batch
 from infrastructure.config import COLLECTION_NAME
-from core.text_cleaning import clean_ocr_text
+from pipelines.ingestion_pipeline import ingest_document
 from utils.pdf_parser import extract_text_from_pdf
 
 LOGGER = logging.getLogger(__name__)
@@ -36,18 +32,7 @@ class IngestRequest(BaseModel):
 
     document_id: str
     text: str
-
-
-class IngestedChunk(BaseModel):
-    """Chunk produced by the ingestion pipeline."""
-
-    chunk_id: str
-    document_id: str
-    doc_type: str | None = None
-    text: str
-    source: str
-    chunk_index: int
-    embedding: list[float]
+    metadata: dict[str, object] | None = None
 
 
 class IngestResponse(BaseModel):
@@ -56,28 +41,6 @@ class IngestResponse(BaseModel):
     status: str
     document_id: str
     num_chunks: int
-
-
-def load_store_chunks() -> Callable[[list[dict]], int]:
-    """Load Qdrant storage from the infrastructure layer."""
-    module_path = PROJECT_ROOT / "infrastructure" / "vector-db" / "qdrant_client.py"
-    spec = importlib.util.spec_from_file_location("qdrant_vector_client", module_path)
-    if spec is None or spec.loader is None:
-        raise RuntimeError("Unable to load Qdrant infrastructure module.")
-
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module.store_chunks
-
-
-store_chunks = load_store_chunks()
-
-
-def model_to_dict(model: BaseModel) -> dict:
-    """Serialize a Pydantic model across supported Pydantic versions."""
-    if hasattr(model, "model_dump"):
-        return model.model_dump()
-    return model.dict()
 
 
 @app.get("/health")
@@ -90,54 +53,22 @@ def log_collection() -> None:
     LOGGER.info("Using Qdrant collection: %s", COLLECTION_NAME)
 
 
-def ingest_document(
-    document_id: str,
-    text: str,
-    source: str,
-    doc_type: str | None = None,
-) -> IngestResponse:
-    """Run the shared text ingestion pipeline for one document."""
-    cleaned_text = clean_ocr_text(text)
-    chunk_texts = chunk_text(cleaned_text)
-    embeddings = embed_batch(chunk_texts)
-    chunks = [
-        IngestedChunk(
-            chunk_id=f"{document_id}_{index}",
-            document_id=document_id,
-            doc_type=doc_type,
-            text=chunk,
-            source=source,
-            chunk_index=index,
-            embedding=embedding,
-        )
-        for index, (chunk, embedding) in enumerate(zip(chunk_texts, embeddings), start=1)
-    ]
-
-    if chunks:
-        average_size = sum(len(chunk.text.split()) for chunk in chunks) / len(chunks)
-        LOGGER.info(
-            "Chunked document %s into %d chunks (avg %.1f words)",
-            document_id,
-            len(chunks),
-            average_size,
-        )
-
-    stored_count = store_chunks([model_to_dict(chunk) for chunk in chunks])
-
-    return IngestResponse(
-        status="stored",
-        document_id=document_id,
-        num_chunks=stored_count,
-    )
-
-
 @app.post("/ingest", response_model=IngestResponse)
 def ingest(request: IngestRequest) -> IngestResponse:
-    """Chunk raw text, embed each chunk, store it, and return a status."""
+    """Parse the request and hand off to the ingestion pipeline."""
     if not request.text.strip():
         raise HTTPException(status_code=400, detail="Text input is empty.")
 
-    return ingest_document(request.document_id, request.text, source="text")
+    result = ingest_document(
+        text=request.text,
+        document_id=request.document_id,
+        metadata=request.metadata or {"source": "text"},
+    )
+    return IngestResponse(
+        status="stored",
+        document_id=result["document_id"],
+        num_chunks=result["chunks_created"],
+    )
 
 
 @app.post("/ingest/file", response_model=IngestResponse)
@@ -160,4 +91,13 @@ def ingest_file(file: UploadFile = File(...)) -> IngestResponse:
         raise HTTPException(status_code=400, detail="No extractable text found in PDF.")
 
     document_id = Path(filename).stem or str(uuid4())
-    return ingest_document(document_id, text, source="pdf")
+    result = ingest_document(
+        text=text,
+        document_id=document_id,
+        metadata={"source": "pdf"},
+    )
+    return IngestResponse(
+        status="stored",
+        document_id=result["document_id"],
+        num_chunks=result["chunks_created"],
+    )

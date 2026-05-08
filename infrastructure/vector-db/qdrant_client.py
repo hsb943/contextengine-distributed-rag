@@ -3,7 +3,7 @@ from typing import Iterable, List, TypedDict
 from uuid import NAMESPACE_URL, uuid5
 
 from core.embeddings import EMBEDDING_DIMENSION
-from infrastructure.config import COLLECTION_NAME, QDRANT_HOST, QDRANT_PORT
+from infrastructure.config.config import COLLECTION_NAME, QDRANT_HOST, QDRANT_PORT
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
     Distance,
@@ -132,5 +132,6 @@ def search_chunks(
 
 LOGGER.info("Connected to Qdrant at %s:%s", QDRANT_HOST, QDRANT_PORT)
 LOGGER.info("Using collection: %s", COLLECTION_NAME)
+print(f"[QDRANT] Connecting to {QDRANT_HOST}:{QDRANT_PORT}")
 _CLIENT = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
 ensure_collection(_CLIENT)

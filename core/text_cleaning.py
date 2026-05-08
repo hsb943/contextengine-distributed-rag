@@ -17,3 +17,8 @@ def clean_ocr_text(text: str) -> str:
     cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
     cleaned = re.sub(r"[ \t]*\n[ \t]*", "\n", cleaned)
     return cleaned.strip()
+
+
+def clean_text(text: str) -> str:
+    """Compatibility alias for OCR/text normalization."""
+    return clean_ocr_text(text)
