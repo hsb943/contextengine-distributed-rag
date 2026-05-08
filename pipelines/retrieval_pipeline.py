@@ -46,7 +46,7 @@ def build_filter(filters: dict[str, Any] | None) -> Filter | None:
 
 def retrieve(
     query: str,
-    top_k: int = 5,
+    top_k: int = 50,
     filters: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     """Retrieve and rerank relevant chunks for a query."""
@@ -81,6 +81,10 @@ def retrieve(
                 "document_id": match["document_id"],
                 "text": match["text"],
                 "score": score,
+                "metadata": {
+                    "document_id": match["document_id"],
+                    "chunk_id": match["chunk_id"],
+                },
             }
         )
 
