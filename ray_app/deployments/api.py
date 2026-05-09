@@ -14,6 +14,10 @@ class APIDeployment:
         self.ingestion = ingestion
 
     async def __call__(self, request: Request):
+        if request.method == "GET":
+            LOGGER.info("Health check received")
+            return {"status": "ok", "service": "ray-api"}
+
         body = await request.json()
         route = body.get("route", "query")
         LOGGER.info("Request received for route: %s", route)

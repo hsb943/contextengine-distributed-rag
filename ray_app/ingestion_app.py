@@ -19,6 +19,6 @@ class IngestionAPI:
 
 
 if __name__ == "__main__":
-    serve.start()
+    serve.start(http_options={"host": "0.0.0.0", "port": 8000})
     app = IngestionAPI.bind(IngestionDeployment.bind())
     serve.run(app, route_prefix="/", blocking=True)
