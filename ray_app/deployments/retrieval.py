@@ -7,7 +7,7 @@ from pipelines.retrieval_pipeline import retrieve
 LOGGER = logging.getLogger(__name__)
 
 
-@serve.deployment(num_replicas=1, max_ongoing_requests=10)
+@serve.deployment(num_replicas=1, max_ongoing_requests=10, ray_actor_options={"num_cpus": 0})
 class RetrievalDeployment:
     async def search(self, query: str, top_k: int = 50, filters: dict | None = None):
         LOGGER.info("Retrieval request received: %s", query)

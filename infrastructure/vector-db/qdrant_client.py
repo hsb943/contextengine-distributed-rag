@@ -1,3 +1,4 @@
+from functools import lru_cache
 from logging import getLogger
 from typing import Iterable, List, TypedDict
 from uuid import NAMESPACE_URL, uuid5
@@ -39,9 +40,14 @@ class SearchResult(TypedDict):
     score: float
 
 
+@lru_cache(maxsize=1)
 def get_client() -> QdrantClient:
     """Return the shared Docker-backed Qdrant client."""
-    return _CLIENT
+    LOGGER.info("Connecting to Qdrant at %s:%s", QDRANT_HOST, QDRANT_PORT)
+    print(f"[QDRANT] Connecting to {QDRANT_HOST}:{QDRANT_PORT}")
+    client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
+    ensure_collection(client)
+    return client
 
 
 def ensure_collection(client: QdrantClient) -> None:
@@ -129,9 +135,4 @@ def search_chunks(
         )
     return results
 
-
-LOGGER.info("Connected to Qdrant at %s:%s", QDRANT_HOST, QDRANT_PORT)
 LOGGER.info("Using collection: %s", COLLECTION_NAME)
-print(f"[QDRANT] Connecting to {QDRANT_HOST}:{QDRANT_PORT}")
-_CLIENT = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
-ensure_collection(_CLIENT)

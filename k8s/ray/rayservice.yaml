@@ -1,0 +1,77 @@
+apiVersion: ray.io/v1
+kind: RayService
+metadata:
+  name: contextengine-rayservice
+  namespace: contextengine
+spec:
+  serveConfigV2: |
+    applications:
+      - name: contextengine
+        import_path: ray_app.app:app
+        route_prefix: /
+  rayClusterConfig:
+    rayVersion: "2.55.1"
+    headGroupSpec:
+      rayStartParams:
+        dashboard-host: "0.0.0.0"
+      template:
+        spec:
+          containers:
+            - name: ray-head
+              image: contextengine-backend:v3
+              imagePullPolicy: Never
+              resources:
+                requests:
+                  cpu: "1"
+                  memory: "3Gi"
+                limits:
+                  cpu: "1"
+                  memory: "3Gi"
+              env:
+                - name: OPENAI_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: contextengine-openai
+                      key: OPENAI_API_KEY
+                - name: QDRANT_HOST
+                  value: qdrant
+                - name: QDRANT_PORT
+                  value: "6333"
+              ports:
+                - name: gcs-server
+                  containerPort: 6379
+                - name: dashboard
+                  containerPort: 8265
+                - name: client
+                  containerPort: 10001
+                - name: serve
+                  containerPort: 8000
+    workerGroupSpecs:
+      - groupName: cpu-workers
+        replicas: 3
+        minReplicas: 3
+        maxReplicas: 3
+        rayStartParams: {}
+        template:
+          spec:
+            containers:
+              - name: ray-worker
+                image: contextengine-backend:v3
+                imagePullPolicy: Never
+                resources:
+                  requests:
+                    cpu: "1"
+                    memory: "2Gi"
+                  limits:
+                    cpu: "1"
+                    memory: "2Gi"
+                env:
+                  - name: OPENAI_API_KEY
+                    valueFrom:
+                      secretKeyRef:
+                        name: contextengine-openai
+                        key: OPENAI_API_KEY
+                  - name: QDRANT_HOST
+                    value: qdrant
+                  - name: QDRANT_PORT
+                    value: "6333"
