@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: model-download-job
+  namespace: contextengine
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: model-downloader
+          image: contextengine-backend:v7
+          imagePullPolicy: Never
+          command:
+            - python
+            - -u
+            - /app/scripts/download_models.py
+          env:
+            - name: PYTHONPATH
+              value: /app
+            - name: HF_HOME
+              value: /opt/huggingface
+            - name: HF_HUB_CACHE
+              value: /opt/huggingface/hub
+            - name: TRANSFORMERS_CACHE
+              value: /opt/huggingface/transformers
+            - name: SENTENCE_TRANSFORMERS_HOME
+              value: /opt/huggingface/sentence-transformers
+          volumeMounts:
+            - name: huggingface-cache
+              mountPath: /opt/huggingface
+      volumes:
+        - name: huggingface-cache
+          persistentVolumeClaim:
+            claimName: huggingface-cache-pvc

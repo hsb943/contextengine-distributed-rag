@@ -19,8 +19,7 @@ RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r /app/requirements.txt \
     && pip install --no-cache-dir "ray[serve]"
 
-RUN mkdir -p /opt/huggingface \
-    && python -c "from huggingface_hub import snapshot_download; from sentence_transformers import SentenceTransformer; snapshot_download('BAAI/bge-reranker-base'); SentenceTransformer('BAAI/bge-base-en-v1.5', device='cpu')"
+RUN mkdir -p /opt/huggingface
 
 COPY . /app
 

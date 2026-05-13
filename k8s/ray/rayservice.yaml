@@ -14,19 +14,20 @@ spec:
     headGroupSpec:
       rayStartParams:
         dashboard-host: "0.0.0.0"
+        num-cpus: "0"
       template:
         spec:
           containers:
             - name: ray-head
-              image: contextengine-backend:v3
+              image: contextengine-backend:v7
               imagePullPolicy: Never
               resources:
                 requests:
-                  cpu: "1"
-                  memory: "3Gi"
+                  cpu: "2"
+                  memory: "4Gi"
                 limits:
-                  cpu: "1"
-                  memory: "3Gi"
+                  cpu: "2"
+                  memory: "4Gi"
               env:
                 - name: OPENAI_API_KEY
                   valueFrom:
@@ -37,6 +38,17 @@ spec:
                   value: qdrant
                 - name: QDRANT_PORT
                   value: "6333"
+                - name: HF_HOME
+                  value: /opt/huggingface
+                - name: HF_HUB_CACHE
+                  value: /opt/huggingface/hub
+                - name: TRANSFORMERS_CACHE
+                  value: /opt/huggingface/transformers
+                - name: SENTENCE_TRANSFORMERS_HOME
+                  value: /opt/huggingface/sentence-transformers
+              volumeMounts:
+                - name: huggingface-cache
+                  mountPath: /opt/huggingface
               ports:
                 - name: gcs-server
                   containerPort: 6379
@@ -46,25 +58,29 @@ spec:
                   containerPort: 10001
                 - name: serve
                   containerPort: 8000
+          volumes:
+            - name: huggingface-cache
+              persistentVolumeClaim:
+                claimName: huggingface-cache-pvc
     workerGroupSpecs:
       - groupName: cpu-workers
-        replicas: 3
-        minReplicas: 3
-        maxReplicas: 3
+        replicas: 1
+        minReplicas: 1
+        maxReplicas: 1
         rayStartParams: {}
         template:
           spec:
             containers:
               - name: ray-worker
-                image: contextengine-backend:v3
+                image: contextengine-backend:v7
                 imagePullPolicy: Never
                 resources:
                   requests:
-                    cpu: "1"
-                    memory: "2Gi"
+                    cpu: "2"
+                    memory: "3Gi"
                   limits:
-                    cpu: "1"
-                    memory: "2Gi"
+                    cpu: "2"
+                    memory: "3Gi"
                 env:
                   - name: OPENAI_API_KEY
                     valueFrom:
@@ -75,3 +91,18 @@ spec:
                     value: qdrant
                   - name: QDRANT_PORT
                     value: "6333"
+                  - name: HF_HOME
+                    value: /opt/huggingface
+                  - name: HF_HUB_CACHE
+                    value: /opt/huggingface/hub
+                  - name: TRANSFORMERS_CACHE
+                    value: /opt/huggingface/transformers
+                  - name: SENTENCE_TRANSFORMERS_HOME
+                    value: /opt/huggingface/sentence-transformers
+                volumeMounts:
+                  - name: huggingface-cache
+                    mountPath: /opt/huggingface
+            volumes:
+              - name: huggingface-cache
+                persistentVolumeClaim:
+                  claimName: huggingface-cache-pvc

@@ -10,7 +10,7 @@ from utils.pdf_parser import extract_text_from_pdf
 LOGGER = logging.getLogger(__name__)
 
 
-@serve.deployment(num_replicas=1, ray_actor_options={"num_cpus": 0})
+@serve.deployment(num_replicas=1, ray_actor_options={"num_cpus": 0.25})
 class APIDeployment:
     def __init__(self, retrieval, llm, ingestion):
         self.retrieval = retrieval
@@ -19,7 +19,7 @@ class APIDeployment:
 
     async def __call__(self, request: Request):
         if request.method == "GET":
-            LOGGER.info("Health check received")
+            LOGGER.info("[API] Health check received")
             return {"status": "ok", "service": "ray-api"}
 
         path = request.url.path.rstrip("/") or "/"
@@ -79,7 +79,7 @@ class APIDeployment:
 
         body = await request.json()
         route = body.get("route", "query")
-        LOGGER.info("Request received for route: %s", route)
+        LOGGER.info("[API] Request received for route: %s", route)
 
         if route == "ingest":
             return await self.ingestion.ingest.remote(

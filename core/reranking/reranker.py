@@ -2,21 +2,19 @@ from functools import lru_cache
 from typing import List, Tuple
 
 import torch
-from huggingface_hub import snapshot_download
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
+
+from infrastructure.model_cache import resolve_reranker_model_path
 
 RERANKER_MODEL_NAME = "BAAI/bge-reranker-base"
 
 
 @lru_cache(maxsize=1)
 def _load_reranker():
-    model_path = snapshot_download(RERANKER_MODEL_NAME, local_files_only=True)
-    tokenizer = AutoTokenizer.from_pretrained(
-        model_path,
-        local_files_only=True,
-    )
+    model_path = resolve_reranker_model_path()
+    tokenizer = AutoTokenizer.from_pretrained(str(model_path), local_files_only=True)
     model = AutoModelForSequenceClassification.from_pretrained(
-        model_path,
+        str(model_path),
         local_files_only=True,
     )
     model.eval()
