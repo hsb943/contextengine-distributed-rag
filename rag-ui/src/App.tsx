@@ -10,7 +10,7 @@ type Source = {
   text: string
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
 
 function App() {
   const [file, setFile] = useState<File | null>(null)
@@ -106,7 +106,6 @@ function App() {
   return (
     <main className="app-shell">
       <header className="app-header">
-        <p className="eyebrow">Minimal RAG UI</p>
         <h1>Upload a PDF and ask questions about it.</h1>
         <p className="intro">
           This page talks to the Ray Serve backend for both ingestion and

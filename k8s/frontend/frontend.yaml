@@ -15,11 +15,8 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: contextengine-frontend:local
+          image: contextengine-frontend:v2
           imagePullPolicy: Never
-          env:
-            - name: VITE_API_URL
-              value: "http://localhost:8000"
           ports:
             - name: http
               containerPort: 80
@@ -31,11 +28,10 @@ metadata:
   name: frontend
   namespace: contextengine
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: frontend
   ports:
     - name: http
       port: 80
       targetPort: 80
-      nodePort: 30080
