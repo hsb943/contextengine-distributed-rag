@@ -1,30 +1,13 @@
 import logging
-import importlib.util
 from collections import defaultdict
 from typing import Any
-from pathlib import Path
 
 from core.embeddings import embed_text
 from core.reranking import rerank
+from infrastructure.vector_db.qdrant_client import search_chunks
 from qdrant_client.models import FieldCondition, Filter, MatchValue
 
 LOGGER = logging.getLogger(__name__)
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-
-
-def load_search_chunks():
-    """Load Qdrant search logic from the infrastructure layer."""
-    module_path = PROJECT_ROOT / "infrastructure" / "vector-db" / "qdrant_client.py"
-    spec = importlib.util.spec_from_file_location("qdrant_vector_client", module_path)
-    if spec is None or spec.loader is None:
-        raise RuntimeError("Unable to load Qdrant infrastructure module.")
-
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module.search_chunks
-
-
-search_chunks = load_search_chunks()
 
 
 def build_filter(filters: dict[str, Any] | None) -> Filter | None:

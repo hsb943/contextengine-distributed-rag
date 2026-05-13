@@ -1,30 +1,12 @@
-import importlib.util
 import logging
-from pathlib import Path
 from typing import Any
-from uuid import uuid4
 
 from core.chunking import chunk_text
 from core.embeddings import embed_batch
 from core.text_cleaning import clean_text
+from infrastructure.vector_db.qdrant_client import store_chunks
 
 LOGGER = logging.getLogger(__name__)
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-
-
-def load_store_chunks():
-    """Load Qdrant storage from the infrastructure layer."""
-    module_path = PROJECT_ROOT / "infrastructure" / "vector-db" / "qdrant_client.py"
-    spec = importlib.util.spec_from_file_location("qdrant_vector_client", module_path)
-    if spec is None or spec.loader is None:
-        raise RuntimeError("Unable to load Qdrant infrastructure module.")
-
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module.store_chunks
-
-
-store_chunks = load_store_chunks()
 
 
 def ingest_document(

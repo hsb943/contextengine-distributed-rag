@@ -10,6 +10,8 @@ type Source = {
   text: string
 }
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
 function App() {
   const [file, setFile] = useState<File | null>(null)
   const [documentId, setDocumentId] = useState<string | null>(null)
@@ -34,7 +36,7 @@ function App() {
     setSources([])
 
     try {
-      const response = await fetch('http://localhost:8000/ingest/file', {
+      const response = await fetch(`${API_BASE_URL}/ingest/file`, {
         method: 'POST',
         body: formData,
       })
@@ -77,7 +79,7 @@ function App() {
         payload.document_id = documentId
       }
 
-      const response = await fetch('http://localhost:8002/answer', {
+      const response = await fetch(`${API_BASE_URL}/answer`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -107,8 +109,8 @@ function App() {
         <p className="eyebrow">Minimal RAG UI</p>
         <h1>Upload a PDF and ask questions about it.</h1>
         <p className="intro">
-          This page talks to the ingestion service on port 8000 and the answer
-          service on port 8002.
+          This page talks to the Ray Serve backend for both ingestion and
+          answers.
         </p>
       </header>
 

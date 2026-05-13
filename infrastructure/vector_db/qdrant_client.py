@@ -1,3 +1,4 @@
+from functools import lru_cache
 from logging import getLogger
 from typing import Iterable, List, TypedDict
 from uuid import NAMESPACE_URL, uuid5
@@ -5,6 +6,7 @@ from uuid import NAMESPACE_URL, uuid5
 from core.embeddings import EMBEDDING_DIMENSION
 from infrastructure.config.config import COLLECTION_NAME, QDRANT_HOST, QDRANT_PORT
 from qdrant_client import QdrantClient
+from qdrant_client.http.exceptions import UnexpectedResponse
 from qdrant_client.models import (
     Distance,
     FieldCondition,
@@ -39,33 +41,60 @@ class SearchResult(TypedDict):
     score: float
 
 
+@lru_cache(maxsize=1)
 def get_client() -> QdrantClient:
     """Return the shared Docker-backed Qdrant client."""
-    return _CLIENT
+    LOGGER.info("Connecting to Qdrant at %s:%s", QDRANT_HOST, QDRANT_PORT)
+    print(f"[QDRANT] Connecting to {QDRANT_HOST}:{QDRANT_PORT}")
+    return QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
 
 
-def ensure_collection(client: QdrantClient) -> None:
-    """Create the configured collection or recreate it on size mismatch."""
+def initialize_qdrant() -> None:
+    """Initialize collection state once during deployment startup."""
+    ensure_collection_exists(get_client())
+
+
+def _collection_vector_size(client: QdrantClient) -> int | None:
+    collection_info = client.get_collection(COLLECTION_NAME)
+    vector_config = collection_info.config.params.vectors
+    return getattr(vector_config, "size", None)
+
+
+def _create_collection(client: QdrantClient) -> None:
+    try:
+        LOGGER.info("[QDRANT INIT] Creating collection")
+        client.create_collection(
+            collection_name=COLLECTION_NAME,
+            vectors_config=VectorParams(size=VECTOR_SIZE, distance=Distance.COSINE),
+        )
+    except UnexpectedResponse as exc:
+        message = str(exc)
+        if "already exists" in message or "409" in message:
+            LOGGER.info("[QDRANT INIT] Collection already created by another replica")
+            return
+        raise
+
+
+def ensure_collection_exists(client: QdrantClient) -> None:
+    """Ensure the configured collection exists and matches the expected vector size."""
     if client.collection_exists(COLLECTION_NAME):
-        collection_info = client.get_collection(COLLECTION_NAME)
-        vector_config = collection_info.config.params.vectors
-        existing_size = getattr(vector_config, "size", None)
+        LOGGER.info("[QDRANT INIT] Collection exists")
+        existing_size = _collection_vector_size(client)
 
         if existing_size == VECTOR_SIZE:
             return
 
+        LOGGER.warning("[QDRANT INIT] Vector size mismatch detected")
         client.delete_collection(COLLECTION_NAME)
+        _create_collection(client)
+        return
 
-    client.create_collection(
-        collection_name=COLLECTION_NAME,
-        vectors_config=VectorParams(size=VECTOR_SIZE, distance=Distance.COSINE),
-    )
+    _create_collection(client)
 
 
 def store_chunks(chunks: Iterable[ChunkRecord]) -> int:
     """Store embedded chunks in Qdrant and return the number stored."""
     client = get_client()
-    ensure_collection(client)
 
     points = [
         PointStruct(
@@ -100,7 +129,6 @@ def search_chunks(
         return []
 
     client = get_client()
-    ensure_collection(client)
 
     if client.count(collection_name=COLLECTION_NAME).count == 0:
         return []
@@ -129,9 +157,4 @@ def search_chunks(
         )
     return results
 
-
-LOGGER.info("Connected to Qdrant at %s:%s", QDRANT_HOST, QDRANT_PORT)
 LOGGER.info("Using collection: %s", COLLECTION_NAME)
-print(f"[QDRANT] Connecting to {QDRANT_HOST}:{QDRANT_PORT}")
-_CLIENT = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
-ensure_collection(_CLIENT)

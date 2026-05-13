@@ -5,6 +5,8 @@ from typing import List
 import torch
 from sentence_transformers import SentenceTransformer
 
+from infrastructure.model_cache import resolve_embedding_model_path
+
 LOGGER = logging.getLogger(__name__)
 
 EMBEDDING_MODEL_NAME = "BAAI/bge-base-en-v1.5"
@@ -24,8 +26,9 @@ def _get_model() -> SentenceTransformer:
     if _MODEL is None:
         with _MODEL_LOCK:
             if _MODEL is None:
-                LOGGER.info("Loading embedding model on %s", _DEVICE)
-                _MODEL = SentenceTransformer(EMBEDDING_MODEL_NAME, device=_DEVICE)
+                model_path = resolve_embedding_model_path()
+                LOGGER.info("Loading embedding model from cache on %s", _DEVICE)
+                _MODEL = SentenceTransformer(str(model_path), device=_DEVICE)
     return _MODEL
 
 
@@ -33,7 +36,7 @@ def embed_text(text: str) -> List[float]:
     """Embed text with a shared sentence-transformers model.
 
     Embeddings are normalized so they work well with cosine similarity in
-    Qdrant. The model is loaded once at module import time and reused.
+    Qdrant. The model is loaded lazily and reused.
     """
     model = _get_model()
     embedding = model.encode(text, normalize_embeddings=True)

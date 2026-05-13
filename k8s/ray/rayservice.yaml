@@ -1,0 +1,108 @@
+apiVersion: ray.io/v1
+kind: RayService
+metadata:
+  name: contextengine-rayservice
+  namespace: contextengine
+spec:
+  serveConfigV2: |
+    applications:
+      - name: contextengine
+        import_path: ray_app.app:app
+        route_prefix: /
+  rayClusterConfig:
+    rayVersion: "2.55.1"
+    headGroupSpec:
+      rayStartParams:
+        dashboard-host: "0.0.0.0"
+        num-cpus: "0"
+      template:
+        spec:
+          containers:
+            - name: ray-head
+              image: contextengine-backend:v7
+              imagePullPolicy: Never
+              resources:
+                requests:
+                  cpu: "2"
+                  memory: "4Gi"
+                limits:
+                  cpu: "2"
+                  memory: "4Gi"
+              env:
+                - name: OPENAI_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: contextengine-openai
+                      key: OPENAI_API_KEY
+                - name: QDRANT_HOST
+                  value: qdrant
+                - name: QDRANT_PORT
+                  value: "6333"
+                - name: HF_HOME
+                  value: /opt/huggingface
+                - name: HF_HUB_CACHE
+                  value: /opt/huggingface/hub
+                - name: TRANSFORMERS_CACHE
+                  value: /opt/huggingface/transformers
+                - name: SENTENCE_TRANSFORMERS_HOME
+                  value: /opt/huggingface/sentence-transformers
+              volumeMounts:
+                - name: huggingface-cache
+                  mountPath: /opt/huggingface
+              ports:
+                - name: gcs-server
+                  containerPort: 6379
+                - name: dashboard
+                  containerPort: 8265
+                - name: client
+                  containerPort: 10001
+                - name: serve
+                  containerPort: 8000
+          volumes:
+            - name: huggingface-cache
+              persistentVolumeClaim:
+                claimName: huggingface-cache-pvc
+    workerGroupSpecs:
+      - groupName: cpu-workers
+        replicas: 1
+        minReplicas: 1
+        maxReplicas: 1
+        rayStartParams: {}
+        template:
+          spec:
+            containers:
+              - name: ray-worker
+                image: contextengine-backend:v7
+                imagePullPolicy: Never
+                resources:
+                  requests:
+                    cpu: "2"
+                    memory: "3Gi"
+                  limits:
+                    cpu: "2"
+                    memory: "3Gi"
+                env:
+                  - name: OPENAI_API_KEY
+                    valueFrom:
+                      secretKeyRef:
+                        name: contextengine-openai
+                        key: OPENAI_API_KEY
+                  - name: QDRANT_HOST
+                    value: qdrant
+                  - name: QDRANT_PORT
+                    value: "6333"
+                  - name: HF_HOME
+                    value: /opt/huggingface
+                  - name: HF_HUB_CACHE
+                    value: /opt/huggingface/hub
+                  - name: TRANSFORMERS_CACHE
+                    value: /opt/huggingface/transformers
+                  - name: SENTENCE_TRANSFORMERS_HOME
+                    value: /opt/huggingface/sentence-transformers
+                volumeMounts:
+                  - name: huggingface-cache
+                    mountPath: /opt/huggingface
+            volumes:
+              - name: huggingface-cache
+                persistentVolumeClaim:
+                  claimName: huggingface-cache-pvc
