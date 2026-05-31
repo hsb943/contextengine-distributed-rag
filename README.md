@@ -42,7 +42,22 @@ The project demonstrates how <ins><strong>modern LLM systems</strong></ins> can 
 
 ---
 
-## 3. Project Outcomes
+## 3. Technology Stack
+
+| Category               | Technologies    |
+| ---------------------- | --------------- |
+| 1. Backend             | Python, FastAPI |
+| 2. Distributed Serving | Ray Serve       |
+| 3. Containerization    | Docker          |
+| 4. Orchestration       | Kubernetes      |
+| 5. AI Architecture     | RAG             |
+| 6. Retrieval           | Vector Search   |
+| 7. API Layer           | REST APIs       |
+| 8. Deployment          | Cloud Native    |
+
+---
+
+## 4. Project Outcomes
 
 1. Built a distributed Retrieval-Augmented Generation platform.
 2. Designed a modular microservice architecture for AI workloads.
@@ -56,21 +71,21 @@ The project demonstrates how <ins><strong>modern LLM systems</strong></ins> can 
 
 ---
 
-## 4. Key Features
+## 5. Key Features
 
-### 4.1 Distributed Serving
+### 5.1 Distributed Serving
 
 1. Ray Serve based distributed request handling.
 2. Horizontally scalable service architecture.
 3. Separation of inference and orchestration layers.
 
-### 4.2 Retrieval-Augmented Generation
+### 5.2 Retrieval-Augmented Generation
 
 1. Semantic document retrieval.
 2. Context-aware response generation.
 3. Modular retrieval pipeline.
 
-### 4.3 Service-Oriented Design
+### 5.3 Service-Oriented Design
 
 1. API Gateway.
 2. Ingestion Service.
@@ -78,27 +93,12 @@ The project demonstrates how <ins><strong>modern LLM systems</strong></ins> can 
 4. Generation Service.
 5. Shared Core Components.
 
-### 4.4 Kubernetes-Native Architecture
+### 5.4 Kubernetes-Native Architecture
 
 1. Containerized services.
 2. Cloud deployment ready.
 3. Horizontal scalability support.
 4. Infrastructure abstraction.
-
----
-
-## 5. Technology Stack
-
-| Category            | Technologies    |
-| ------------------- | --------------- |
-| Backend             | Python, FastAPI |
-| Distributed Serving | Ray Serve       |
-| Containerization    | Docker          |
-| Orchestration       | Kubernetes      |
-| AI Architecture     | RAG             |
-| Retrieval           | Vector Search   |
-| API Layer           | REST APIs       |
-| Deployment          | Cloud Native    |
 
 ---
 
