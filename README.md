@@ -1,8 +1,8 @@
 # ContextEngine: Distributed RAG Platform on Kubernetes using Ray Serve
 
-ContextEngine is a production-style Retrieval-Augmented Generation (RAG) platform designed for scalable document-aware AI applications. The system leverages Ray Serve for distributed model serving, Kubernetes for orchestration, FastAPI for API management, and vector-based retrieval for efficient semantic search.
+ContextEngine is a <ins><strong>production-style Retrieval-Augmented Generation (RAG) platform</strong></ins> designed for <ins><strong>scalable document-aware AI applications</strong></ins>. The system leverages <ins><strong>Ray Serve</strong></ins> for distributed model serving, <ins><strong>Kubernetes</strong></ins> for orchestration, <ins><strong>FastAPI</strong></ins> for API management, and <ins><strong>vector-based retrieval</strong></ins> for efficient semantic search.
 
-The project demonstrates how modern LLM systems can be architected as modular microservices that separate ingestion, retrieval, generation, and orchestration responsibilities.
+The project demonstrates how <ins><strong>modern LLM systems</strong></ins> can be architected as <ins><strong>modular microservices</strong></ins> that separate <ins><strong>ingestion, retrieval, generation, and orchestration responsibilities</strong></ins>.
 
 ---
 
