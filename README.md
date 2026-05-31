@@ -6,13 +6,43 @@ The project demonstrates how modern LLM systems can be architected as modular mi
 
 ---
 
-## 1. Architecture Overview
+## 1. Highlights
+
+<u>Project highlights</u>
+
+1. Built an **end-to-end distributed RAG platform** covering document ingestion, vector retrieval, LLM inference, backend APIs, frontend integration, and Kubernetes deployment.
+
+2. Designed a **microservice-based architecture** that separates ingestion, retrieval, generation, and API gateway responsibilities.
+
+3. Leveraged **Ray Serve as the distributed serving layer** to orchestrate AI services and enable scalable request routing across Kubernetes.
+
+4. Chose **Ray Serve to support independently scalable AI workloads**, allowing retrieval and generation services to evolve and scale separately.
+
+5. Implemented a complete **PDF ingestion pipeline** with document parsing, chunking, metadata extraction, and embedding generation.
+
+6. Built a **vector-based semantic retrieval system** for context-aware search across indexed documents.
+
+7. Developed dedicated **Retrieval and Generation Services** to create a modular and maintainable AI application architecture.
+
+8. Designed the platform to support **multiple AI models and future model upgrades** without major architectural changes.
+
+9. Containerized all services using **Docker** and deployed them as cloud-native workloads on **Kubernetes**.
+
+10. Established reusable shared components for **configuration management, prompt templates, data models, and common utilities**.
+
+11. Implemented support for **metadata-aware retrieval, document filtering, and advanced chunking strategies** to improve retrieval quality.
+
+12. Demonstrated practical application of **Distributed Systems, Ray Serve, FastAPI, Kubernetes, Vector Search, and Retrieval-Augmented Generation (RAG)** in a production-oriented AI platform.
+
+---
+
+## 2. Architecture Overview
 
 ![ContextEngine distributed RAG architecture](docs/architecture-diagram.svg)
 
 ---
 
-## 2. Project Outcomes
+## 3. Project Outcomes
 
 1. Built a distributed Retrieval-Augmented Generation platform.
 2. Designed a modular microservice architecture for AI workloads.
@@ -26,21 +56,21 @@ The project demonstrates how modern LLM systems can be architected as modular mi
 
 ---
 
-## 3. Key Features
+## 4. Key Features
 
-### 3.1 Distributed Serving
+### 4.1 Distributed Serving
 
 1. Ray Serve based distributed request handling.
 2. Horizontally scalable service architecture.
 3. Separation of inference and orchestration layers.
 
-### 3.2 Retrieval-Augmented Generation
+### 4.2 Retrieval-Augmented Generation
 
 1. Semantic document retrieval.
 2. Context-aware response generation.
 3. Modular retrieval pipeline.
 
-### 3.3 Service-Oriented Design
+### 4.3 Service-Oriented Design
 
 1. API Gateway.
 2. Ingestion Service.
@@ -48,7 +78,7 @@ The project demonstrates how modern LLM systems can be architected as modular mi
 4. Generation Service.
 5. Shared Core Components.
 
-### 3.4 Kubernetes-Native Architecture
+### 4.4 Kubernetes-Native Architecture
 
 1. Containerized services.
 2. Cloud deployment ready.
@@ -57,7 +87,7 @@ The project demonstrates how modern LLM systems can be architected as modular mi
 
 ---
 
-## 4. Technology Stack
+## 5. Technology Stack
 
 | Category            | Technologies    |
 | ------------------- | --------------- |
@@ -72,7 +102,7 @@ The project demonstrates how modern LLM systems can be architected as modular mi
 
 ---
 
-## 5. Repository Structure
+## 6. Repository Structure
 
 ```text
 ContextEngine/
@@ -103,9 +133,9 @@ ContextEngine/
 
 ---
 
-## 6. Getting Started
+## 7. Getting Started
 
-### 6.1 Clone Repository
+### 7.1 Clone Repository
 
 ```bash
 git clone https://github.com/hsb943/contextengine-distributed-rag.git
@@ -113,13 +143,13 @@ git clone https://github.com/hsb943/contextengine-distributed-rag.git
 cd contextengine-distributed-rag
 ```
 
-### 6.2 Install Dependencies
+### 7.2 Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 6.3 Start API Gateway
+### 7.3 Start API Gateway
 
 ```bash
 cd services/api-gateway
@@ -127,7 +157,7 @@ cd services/api-gateway
 uvicorn main:app --reload
 ```
 
-### 6.4 Health Check
+### 7.4 Health Check
 
 ```bash
 curl http://127.0.0.1:8000/health
@@ -143,7 +173,7 @@ Expected Response:
 
 ---
 
-## 7. Design Principles
+## 8. Design Principles
 
 The project follows several production engineering principles:
 
@@ -157,7 +187,7 @@ The project follows several production engineering principles:
 
 ---
 
-## 8. Potential Extensions
+## 9. Potential Extensions
 
 1. Distributed vector databases.
 2. Streaming LLM responses.
@@ -171,7 +201,7 @@ The project follows several production engineering principles:
 
 ---
 
-## 9. Learning Objectives
+## 10. Learning Objectives
 
 This project demonstrates practical experience with:
 
@@ -186,6 +216,6 @@ This project demonstrates practical experience with:
 
 ---
 
-## 10. License
+## 11. License
 
 This repository is intended for educational, research, and portfolio purposes.
