@@ -38,7 +38,7 @@ export function ResultSection({
                 <p className="source-meta">
                   {source.document_id} - {source.chunk_id}
                 </p>
-                <p>{source.text}</p>
+                <p className="source-text">{source.text}</p>
               </li>
             ))}
           </ul>
