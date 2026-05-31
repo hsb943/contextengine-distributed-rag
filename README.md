@@ -14,32 +14,36 @@ The project demonstrates how modern LLM systems can be architected as modular mi
                     +--------+---------+
                              |
                              v
-                 +---------------------+
-                 |     API Gateway     |
-                 |      FastAPI        |
-                 +--------+------------+
-                          |
-                          v
-                 +---------------------+
-                 |      Ray Serve      |
-                 | Distributed Routing |
-                 +--------+------------+
-                          |
-        +-----------------+-----------------+
-        v                 v                 v
+        +------------------------------------------------+
+        |              Kubernetes Cluster                |
+        |                                                |
+        |   +---------------------+                      |
+        |   |     API Gateway     |                      |
+        |   |      FastAPI        |                      |
+        |   +--------+------------+                      |
+        |            |                                   |
+        |            v                                   |
+        |   +---------------------+                      |
+        |   |      Ray Serve      |                      |
+        |   | Distributed Routing |                      |
+        |   +--------+------------+                      |
+        |            |                                   |
+        |   +--------+--------+--------+                 |
+        |   v                 v        v                 |
+        |                                                |
+        | +--------------+  +--------------+  +--------------+
+        | |  Ingestion   |  |  Retrieval   |  | Generation   |
+        | |   Service    |  |   Service    |  |   Service    |
+        | +------+-------+  +------+-------+  +------+-------+
+        |        |                 |                 |       |
+        +--------|-----------------|-----------------|-------+
+                 v                 v                 v
 
-+--------------+  +--------------+  +--------------+
-|  Ingestion   |  |  Retrieval   |  | Generation   |
-|   Service    |  |   Service    |  |   Service    |
-+------+-------+  +------+-------+  +------+-------+
-       |                 |                 |
-       v                 v                 v
-
-+--------------+  +--------------+  +--------------+
-| Documents    |  | Vector Store |  |     LLM      |
-| Processing   |  | Semantic     |  | Inference    |
-| Pipeline     |  | Search       |  | Engine       |
-+--------------+  +--------------+  +--------------+
+          +--------------+  +--------------+  +--------------+
+          | Documents    |  | Vector Store |  |     LLM      |
+          | Processing   |  | Semantic     |  | Inference    |
+          | Pipeline     |  | Search       |  | Engine       |
+          +--------------+  +--------------+  +--------------+
 ```
 
 ---
