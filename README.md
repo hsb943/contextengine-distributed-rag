@@ -10,29 +10,29 @@ The project demonstrates how modern LLM systems can be architected as modular mi
 
 <u>Project highlights</u>
 
-1. Built an **end-to-end distributed RAG platform** covering document ingestion, vector retrieval, LLM inference, backend APIs, frontend integration, and Kubernetes deployment.
+1. Built an <u>**end-to-end distributed RAG platform**</u> covering document ingestion, vector retrieval, LLM inference, backend APIs, frontend integration, and Kubernetes deployment.
 
-2. Designed a **microservice-based architecture** that separates ingestion, retrieval, generation, and API gateway responsibilities.
+2. Designed a <u>**microservice-based architecture**</u> that separates ingestion, retrieval, generation, and API gateway responsibilities.
 
-3. Leveraged **Ray Serve as the distributed serving layer** to orchestrate AI services and enable scalable request routing across Kubernetes.
+3. Leveraged <u>**Ray Serve as the distributed serving layer**</u> to orchestrate AI services and enable scalable request routing across Kubernetes.
 
-4. Chose **Ray Serve to support independently scalable AI workloads**, allowing retrieval and generation services to evolve and scale separately.
+4. Chose <u>**Ray Serve to support independently scalable AI workloads**</u>, allowing retrieval and generation services to evolve and scale separately.
 
-5. Implemented a complete **PDF ingestion pipeline** with document parsing, chunking, metadata extraction, and embedding generation.
+5. Implemented a complete <u>**PDF ingestion pipeline**</u> with document parsing, chunking, metadata extraction, and embedding generation.
 
-6. Built a **vector-based semantic retrieval system** for context-aware search across indexed documents.
+6. Built a <u>**vector-based semantic retrieval system**</u> for context-aware search across indexed documents.
 
-7. Developed dedicated **Retrieval and Generation Services** to create a modular and maintainable AI application architecture.
+7. Developed dedicated <u>**Retrieval and Generation Services**</u> to create a modular and maintainable AI application architecture.
 
-8. Designed the platform to support **multiple AI models and future model upgrades** without major architectural changes.
+8. Designed the platform to support <u>**multiple AI models and future model upgrades**</u> without major architectural changes.
 
-9. Containerized all services using **Docker** and deployed them as cloud-native workloads on **Kubernetes**.
+9. Containerized all services using <u>**Docker**</u> and deployed them as cloud-native workloads on <u>**Kubernetes**</u>.
 
-10. Established reusable shared components for **configuration management, prompt templates, data models, and common utilities**.
+10. Established reusable shared components for <u>**configuration management, prompt templates, data models, and common utilities**</u>.
 
-11. Implemented support for **metadata-aware retrieval, document filtering, and advanced chunking strategies** to improve retrieval quality.
+11. Implemented support for <u>**metadata-aware retrieval, document filtering, and advanced chunking strategies**</u> to improve retrieval quality.
 
-12. Demonstrated practical application of **Distributed Systems, Ray Serve, FastAPI, Kubernetes, Vector Search, and Retrieval-Augmented Generation (RAG)** in a production-oriented AI platform.
+12. Demonstrated practical application of <u>**Distributed Systems, Ray Serve, FastAPI, Kubernetes, Vector Search, and Retrieval-Augmented Generation (RAG)**</u> in a production-oriented AI platform.
 
 ---
 
