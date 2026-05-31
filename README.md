@@ -6,90 +6,90 @@ The project demonstrates how modern LLM systems can be architected as modular mi
 
 ---
 
-## Architecture Overview
+## 1. Architecture Overview
 
 ```text
-                    ┌──────────────────┐
-                    │      Client      │
-                    └────────┬─────────┘
-                             │
-                             ▼
-                 ┌─────────────────────┐
-                 │     API Gateway     │
-                 │      FastAPI        │
-                 └────────┬────────────┘
-                          │
-                          ▼
-                 ┌─────────────────────┐
-                 │      Ray Serve      │
-                 │ Distributed Routing │
-                 └────────┬────────────┘
-                          │
-        ┌─────────────────┼─────────────────┐
-        ▼                 ▼                 ▼
+                    +------------------+
+                    |      Client      |
+                    +--------+---------+
+                             |
+                             v
+                 +---------------------+
+                 |     API Gateway     |
+                 |      FastAPI        |
+                 +--------+------------+
+                          |
+                          v
+                 +---------------------+
+                 |      Ray Serve      |
+                 | Distributed Routing |
+                 +--------+------------+
+                          |
+        +-----------------+-----------------+
+        v                 v                 v
 
-┌──────────────┐  ┌──────────────┐  ┌──────────────┐
-│  Ingestion   │  │  Retrieval   │  │ Generation   │
-│   Service    │  │   Service    │  │   Service    │
-└──────┬───────┘  └──────┬───────┘  └──────┬───────┘
-       │                 │                 │
-       ▼                 ▼                 ▼
++--------------+  +--------------+  +--------------+
+|  Ingestion   |  |  Retrieval   |  | Generation   |
+|   Service    |  |   Service    |  |   Service    |
++------+-------+  +------+-------+  +------+-------+
+       |                 |                 |
+       v                 v                 v
 
-┌──────────────┐  ┌──────────────┐  ┌──────────────┐
-│ Documents    │  │ Vector Store │  │     LLM      │
-│ Processing   │  │ Semantic     │  │ Inference    │
-│ Pipeline     │  │ Search       │  │ Engine       │
-└──────────────┘  └──────────────┘  └──────────────┘
++--------------+  +--------------+  +--------------+
+| Documents    |  | Vector Store |  |     LLM      |
+| Processing   |  | Semantic     |  | Inference    |
+| Pipeline     |  | Search       |  | Engine       |
++--------------+  +--------------+  +--------------+
 ```
 
 ---
 
-## Project Outcomes
+## 2. Project Outcomes
 
-* Built a distributed Retrieval-Augmented Generation platform
-* Designed a modular microservice architecture for AI workloads
-* Implemented API Gateway pattern using FastAPI
-* Integrated semantic retrieval workflows
-* Implemented scalable LLM orchestration pipelines
-* Containerized services using Docker
-* Designed Kubernetes-ready deployment architecture
-* Utilized Ray Serve for distributed request routing and scaling
-* Structured codebase for production-style maintainability
-
----
-
-## Key Features
-
-### Distributed Serving
-
-* Ray Serve based distributed request handling
-* Horizontally scalable service architecture
-* Separation of inference and orchestration layers
-
-### Retrieval-Augmented Generation
-
-* Semantic document retrieval
-* Context-aware response generation
-* Modular retrieval pipeline
-
-### Service-Oriented Design
-
-* API Gateway
-* Ingestion Service
-* Retrieval Service
-* Generation Service
-* Shared Core Components
-
-### Kubernetes-Native Architecture
-
-* Containerized services
-* Cloud deployment ready
-* Horizontal scalability support
-* Infrastructure abstraction
+1. Built a distributed Retrieval-Augmented Generation platform.
+2. Designed a modular microservice architecture for AI workloads.
+3. Implemented API Gateway pattern using FastAPI.
+4. Integrated semantic retrieval workflows.
+5. Implemented scalable LLM orchestration pipelines.
+6. Containerized services using Docker.
+7. Designed Kubernetes-ready deployment architecture.
+8. Utilized Ray Serve for distributed request routing and scaling.
+9. Structured codebase for production-style maintainability.
 
 ---
 
-## Technology Stack
+## 3. Key Features
+
+### 3.1 Distributed Serving
+
+1. Ray Serve based distributed request handling.
+2. Horizontally scalable service architecture.
+3. Separation of inference and orchestration layers.
+
+### 3.2 Retrieval-Augmented Generation
+
+1. Semantic document retrieval.
+2. Context-aware response generation.
+3. Modular retrieval pipeline.
+
+### 3.3 Service-Oriented Design
+
+1. API Gateway.
+2. Ingestion Service.
+3. Retrieval Service.
+4. Generation Service.
+5. Shared Core Components.
+
+### 3.4 Kubernetes-Native Architecture
+
+1. Containerized services.
+2. Cloud deployment ready.
+3. Horizontal scalability support.
+4. Infrastructure abstraction.
+
+---
+
+## 4. Technology Stack
 
 | Category            | Technologies    |
 | ------------------- | --------------- |
@@ -104,54 +104,54 @@ The project demonstrates how modern LLM systems can be architected as modular mi
 
 ---
 
-## Repository Structure
+## 5. Repository Structure
 
 ```text
 ContextEngine/
-│
-├── services/
-│   ├── api-gateway/
-│   ├── ingestion/
-│   ├── retrieval/
-│   └── generation/
-│
-├── core/
-│   ├── configs/
-│   ├── models/
-│   ├── utilities/
-│   └── shared/
-│
-├── infrastructure/
-│   ├── kubernetes/
-│   ├── docker/
-│   └── deployment/
-│
-├── docs/
-│
-├── tests/
-│
-└── requirements.txt
+|
++-- services/
+|   +-- api-gateway/
+|   +-- ingestion/
+|   +-- retrieval/
+|   +-- generation/
+|
++-- core/
+|   +-- configs/
+|   +-- models/
+|   +-- utilities/
+|   +-- shared/
+|
++-- infrastructure/
+|   +-- kubernetes/
+|   +-- docker/
+|   +-- deployment/
+|
++-- docs/
+|
++-- tests/
+|
++-- requirements.txt
 ```
 
 ---
 
-## Getting Started
+## 6. Getting Started
 
-### Clone Repository
+### 6.1 Clone Repository
 
 ```bash
-git clone https://github.com/your-username/contextengine-distributed-rag.git
+git clone https://github.com/hsb943/contextengine-distributed-rag.git
 
 cd contextengine-distributed-rag
 ```
 
-### Install Dependencies
+### 6.2 Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Start API Gateway
+### 6.3 Start API Gateway
 
 ```bash
 cd services/api-gateway
@@ -159,7 +159,7 @@ cd services/api-gateway
 uvicorn main:app --reload
 ```
 
-### Health Check
+### 6.4 Health Check
 
 ```bash
 curl http://127.0.0.1:8000/health
@@ -175,53 +175,49 @@ Expected Response:
 
 ---
 
-## Design Principles
+## 7. Design Principles
 
 The project follows several production engineering principles:
 
-* Separation of concerns
-* Service modularity
-* Scalability by design
-* Infrastructure abstraction
-* Cloud-native deployment patterns
-* Reusable core components
-* Independent service evolution
+1. Separation of concerns.
+2. Service modularity.
+3. Scalability by design.
+4. Infrastructure abstraction.
+5. Cloud-native deployment patterns.
+6. Reusable core components.
+7. Independent service evolution.
 
 ---
 
-## Potential Extensions
+## 8. Potential Extensions
 
-* Distributed vector databases
-* Streaming LLM responses
-* Authentication and authorization
-* Multi-tenant support
-* Prometheus monitoring
-* Grafana dashboards
-* GPU-aware scheduling
-* Model versioning
-* CI/CD pipelines
+1. Distributed vector databases.
+2. Streaming LLM responses.
+3. Authentication and authorization.
+4. Multi-tenant support.
+5. Prometheus monitoring.
+6. Grafana dashboards.
+7. GPU-aware scheduling.
+8. Model versioning.
+9. CI/CD pipelines.
 
 ---
 
-## Learning Objectives
+## 9. Learning Objectives
 
 This project demonstrates practical experience with:
 
-* Distributed Systems
-* Large Language Model Infrastructure
-* Retrieval-Augmented Generation
-* Ray Serve
-* Kubernetes
-* FastAPI
-* Microservice Architecture
-* Cloud-Native Application Design
+1. Distributed Systems.
+2. Large Language Model Infrastructure.
+3. Retrieval-Augmented Generation.
+4. Ray Serve.
+5. Kubernetes.
+6. FastAPI.
+7. Microservice Architecture.
+8. Cloud-Native Application Design.
 
 ---
 
-## License
+## 10. License
 
 This repository is intended for educational, research, and portfolio purposes.
-
-```
-```
-
