@@ -8,43 +8,7 @@ The project demonstrates how modern LLM systems can be architected as modular mi
 
 ## 1. Architecture Overview
 
-```text
-                    +------------------+
-                    |      Client      |
-                    +--------+---------+
-                             |
-                             v
-        +------------------------------------------------+
-        |              Kubernetes Cluster                |
-        |                                                |
-        |   +---------------------+                      |
-        |   |     API Gateway     |                      |
-        |   |      FastAPI        |                      |
-        |   +--------+------------+                      |
-        |            |                                   |
-        |            v                                   |
-        |   +---------------------+                      |
-        |   |      Ray Serve      |                      |
-        |   | Distributed Routing |                      |
-        |   +--------+------------+                      |
-        |            |                                   |
-        |   +--------+--------+--------+                 |
-        |   v                 v        v                 |
-        |                                                |
-        | +--------------+  +--------------+  +--------------+
-        | |  Ingestion   |  |  Retrieval   |  | Generation   |
-        | |   Service    |  |   Service    |  |   Service    |
-        | +------+-------+  +------+-------+  +------+-------+
-        |        |                 |                 |       |
-        +--------|-----------------|-----------------|-------+
-                 v                 v                 v
-
-          +--------------+  +--------------+  +--------------+
-          | Documents    |  | Vector Store |  |     LLM      |
-          | Processing   |  | Semantic     |  | Inference    |
-          | Pipeline     |  | Search       |  | Engine       |
-          +--------------+  +--------------+  +--------------+
-```
+![ContextEngine distributed RAG architecture](docs/architecture-diagram.svg)
 
 ---
 

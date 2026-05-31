@@ -1,0 +1,169 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1320" viewBox="0 0 1200 1320" role="img" aria-labelledby="title desc">
+  <title id="title">ContextEngine distributed RAG architecture</title>
+  <desc id="desc">Client requests pass through Kubernetes Ingress into a Kubernetes cluster, then API Gateway, Ray Serve, ingestion, retrieval, generation, storage, model inference, and shared core components.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111827"/>
+    </marker>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#64748b" flood-opacity="0.18"/>
+    </filter>
+    <style>
+      .label { font: 700 24px Arial, sans-serif; fill: #111827; }
+      .small { font: 600 18px Arial, sans-serif; fill: #111827; }
+      .tiny { font: 600 16px Arial, sans-serif; fill: #334155; }
+      .muted { font: 600 15px Arial, sans-serif; fill: #475569; }
+      .line { stroke: #111827; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .blue { stroke: #2563eb; fill: #eff6ff; }
+      .purple { stroke: #7c3aed; fill: #faf5ff; }
+      .green { stroke: #16a34a; fill: #f0fdf4; }
+      .orange { stroke: #f97316; fill: #fff7ed; }
+      .teal { stroke: #0f9488; fill: #f0fdfa; }
+      .box { stroke-width: 2; rx: 8; filter: url(#shadow); }
+      .dash-blue { stroke: #2563eb; stroke-width: 2.5; stroke-dasharray: 10 10; fill: #f8fbff; }
+      .dash-green { stroke: #15803d; stroke-width: 2.5; stroke-dasharray: 10 10; fill: #fbfffb; }
+      .dash-purple { stroke: #7c3aed; stroke-width: 2.5; stroke-dasharray: 10 10; fill: #fdfaff; }
+      .icon-blue { stroke: #2563eb; fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+      .icon-purple { stroke: #7c3aed; fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+      .icon-orange { stroke: #f97316; fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+      .icon-teal { stroke: #0f9488; fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="1320" fill="#ffffff"/>
+
+  <rect x="460" y="18" width="280" height="64" class="box blue"/>
+  <rect x="494" y="31" width="44" height="31" fill="#ffffff" stroke="#111827" stroke-width="4"/>
+  <path d="M516 62v11m-18 0h36" stroke="#111827" stroke-width="4"/>
+  <text x="600" y="59" text-anchor="middle" class="label">Client</text>
+
+  <path d="M600 82v35" class="line"/>
+  <rect x="395" y="118" width="410" height="68" class="box purple"/>
+  <path d="M444 151h48m-24-24v20m-24 4v17m48-17v17m-64 0h32m16 0h32" class="icon-purple"/>
+  <rect x="462" y="128" width="12" height="14" class="purple" stroke-width="3"/>
+  <text x="600" y="160" text-anchor="middle" class="label">Kubernetes Ingress</text>
+
+  <path d="M600 186v62" class="line"/>
+
+  <rect x="20" y="216" width="1160" height="1084" rx="12" class="dash-blue"/>
+  <text x="104" y="262" class="label">Kubernetes Cluster</text>
+  <polygon points="62,232 84,245 84,271 62,284 40,271 40,245" fill="#2563eb"/>
+  <text x="62" y="266" text-anchor="middle" font-size="24" font-family="Arial" font-weight="700" fill="#ffffff">K8s</text>
+
+  <rect x="325" y="246" width="550" height="94" class="box blue"/>
+  <circle cx="390" cy="292" r="25" class="icon-blue"/>
+  <path d="M390 253v17m0 44v17m-39-39h17m44 0h17m-67-28 12 12m32 32 12 12m0-56-12 12m-32 32-12 12" class="icon-blue"/>
+  <text x="600" y="288" text-anchor="middle" class="label">API Gateway</text>
+  <text x="600" y="316" text-anchor="middle" class="label">FastAPI</text>
+
+  <path d="M600 340v92" class="line"/>
+
+  <rect x="52" y="374" width="1096" height="430" rx="12" class="dash-green"/>
+  <text x="145" y="418" class="label">Ray Cluster (Inside Kubernetes)</text>
+  <circle cx="102" cy="410" r="6" class="icon-blue"/>
+  <circle cx="82" cy="430" r="6" class="icon-blue"/>
+  <circle cx="122" cy="430" r="6" class="icon-blue"/>
+  <circle cx="102" cy="451" r="6" class="icon-blue"/>
+  <path d="M97 415 87 425m20-10 10 10m-15 11v10" class="icon-blue"/>
+
+  <rect x="280" y="438" width="640" height="96" class="box green"/>
+  <circle cx="510" cy="486" r="8" class="icon-blue"/>
+  <circle cx="490" cy="486" r="8" class="icon-blue"/>
+  <circle cx="530" cy="486" r="8" class="icon-blue"/>
+  <circle cx="510" cy="466" r="8" class="icon-blue"/>
+  <circle cx="510" cy="506" r="8" class="icon-blue"/>
+  <path d="M502 486h-4m20 0h4m-8-12v-4m0 28v4" class="icon-blue"/>
+  <text x="600" y="478" text-anchor="middle" class="label">Ray Serve</text>
+  <text x="600" y="510" text-anchor="middle" class="small">Distributed Request Router</text>
+
+  <path d="M600 534v55" class="line"/>
+  <path d="M600 560H250v30" class="line"/>
+  <path d="M600 560h350v30" class="line"/>
+
+  <rect x="96" y="600" width="300" height="188" class="box orange"/>
+  <ellipse cx="170" cy="630" rx="20" ry="8" class="icon-orange"/>
+  <path d="M150 630v34c0 5 9 9 20 9s20-4 20-9v-34m-40 17c0 5 9 9 20 9s20-4 20-9" class="icon-orange"/>
+  <text x="260" y="636" text-anchor="middle" class="label">Ingestion</text>
+  <text x="260" y="664" text-anchor="middle" class="label">Service</text>
+  <rect x="116" y="678" width="260" height="88" rx="8" fill="#fffaf2" stroke="#f97316" stroke-width="2" stroke-dasharray="5 5"/>
+  <text x="246" y="753" text-anchor="middle" class="small" fill="#c2410c">N Pods</text>
+  <rect x="142" y="700" width="26" height="26" class="orange" stroke-width="2"/>
+  <rect x="196" y="700" width="26" height="26" class="orange" stroke-width="2"/>
+  <rect x="250" y="700" width="26" height="26" class="orange" stroke-width="2"/>
+  <text x="318" y="722" class="label" fill="#c2410c">...</text>
+
+  <rect x="450" y="600" width="300" height="188" class="box blue"/>
+  <circle cx="522" cy="636" r="18" class="icon-blue"/>
+  <path d="M536 650l26 26" class="icon-blue"/>
+  <text x="617" y="636" text-anchor="middle" class="label">Retrieval</text>
+  <text x="617" y="664" text-anchor="middle" class="label">Service</text>
+  <rect x="470" y="678" width="260" height="88" rx="8" fill="#f8fbff" stroke="#2563eb" stroke-width="2" stroke-dasharray="5 5"/>
+  <text x="600" y="753" text-anchor="middle" class="small" fill="#1d4ed8">N Pods</text>
+  <rect x="496" y="700" width="26" height="26" class="blue" stroke-width="2"/>
+  <rect x="550" y="700" width="26" height="26" class="blue" stroke-width="2"/>
+  <rect x="604" y="700" width="26" height="26" class="blue" stroke-width="2"/>
+  <text x="672" y="722" class="label" fill="#1d4ed8">...</text>
+
+  <rect x="790" y="600" width="300" height="188" class="box purple"/>
+  <circle cx="852" cy="636" r="18" class="icon-purple"/>
+  <path d="M852 618v36m-18-18h36m-28-13c-16 10-16 16 0 26m20-26c16 10 16 16 0 26" class="icon-purple"/>
+  <text x="960" y="636" text-anchor="middle" class="label">Generation</text>
+  <text x="960" y="664" text-anchor="middle" class="label">Service</text>
+  <rect x="810" y="678" width="260" height="88" rx="8" fill="#fdfaff" stroke="#7c3aed" stroke-width="2" stroke-dasharray="5 5"/>
+  <text x="940" y="753" text-anchor="middle" class="small" fill="#6d28d9">N Pods</text>
+  <rect x="836" y="700" width="26" height="26" class="purple" stroke-width="2"/>
+  <rect x="890" y="700" width="26" height="26" class="purple" stroke-width="2"/>
+  <rect x="944" y="700" width="26" height="26" class="purple" stroke-width="2"/>
+  <text x="1012" y="722" class="label" fill="#6d28d9">...</text>
+
+  <path d="M250 788v70" class="line"/>
+  <path d="M600 788v70" class="line"/>
+  <path d="M940 788v70" class="line"/>
+
+  <rect x="96" y="860" width="300" height="118" class="box orange"/>
+  <path d="M135 886h38l22 22v46h-60zM173 886v22h22" class="icon-orange"/>
+  <text x="250" y="899" text-anchor="middle" class="small">PDF / Docs</text>
+  <text x="250" y="925" text-anchor="middle" class="small">Chunking</text>
+  <text x="250" y="951" text-anchor="middle" class="small">Metadata</text>
+
+  <rect x="450" y="860" width="300" height="118" class="box teal"/>
+  <ellipse cx="510" cy="900" rx="26" ry="10" class="icon-teal"/>
+  <path d="M484 900v52c0 7 12 12 26 12s26-5 26-12v-52m-52 18c0 7 12 12 26 12s26-5 26-12m-52 18c0 7 12 12 26 12s26-5 26-12" class="icon-teal"/>
+  <text x="630" y="895" text-anchor="middle" class="small">Vector Database</text>
+  <text x="630" y="922" text-anchor="middle" class="small">Embeddings Index</text>
+  <text x="630" y="949" text-anchor="middle" class="small">Semantic Retrieval</text>
+
+  <rect x="790" y="860" width="300" height="118" class="box purple"/>
+  <circle cx="845" cy="920" r="24" class="icon-purple"/>
+  <path d="M845 896v48m-24-24h48m-37-17c-20 13-20 21 0 34m26-34c20 13 20 21 0 34" class="icon-purple"/>
+  <text x="955" y="895" text-anchor="middle" class="small">LLM Inference Engine</text>
+  <text x="955" y="922" text-anchor="middle" class="small">OpenAI / Local Model</text>
+  <text x="955" y="949" text-anchor="middle" class="small">Response Generation</text>
+
+  <path d="M250 1018v-40" class="line"/>
+  <path d="M250 1018h310v-40" class="line"/>
+  <path d="M640 978v66" class="line"/>
+  <path d="M640 1018h300v-40" class="line"/>
+
+  <rect x="96" y="1090" width="1000" height="130" rx="10" class="dash-purple"/>
+  <text x="600" y="1126" text-anchor="middle" class="small">Shared Core Components</text>
+
+  <path d="M148 1148h34l20 20v32h-54zM182 1148v20h20" class="icon-purple"/>
+  <circle cx="156" cy="1180" r="5" class="icon-purple"/>
+  <text x="240" y="1168" text-anchor="middle" class="tiny">Config</text>
+  <text x="240" y="1192" text-anchor="middle" class="tiny">Management</text>
+
+  <rect x="360" y="1150" width="46" height="36" rx="4" class="icon-purple"/>
+  <path d="M374 1170l-9 8 9 8m18-16 9 8-9 8" class="icon-purple"/>
+  <text x="462" y="1168" text-anchor="middle" class="tiny">Prompt</text>
+  <text x="462" y="1192" text-anchor="middle" class="tiny">Templates</text>
+
+  <path d="M572 1148h34l20 20v32h-54zM606 1148v20h20m-42 16h28m-28-16h16" class="icon-purple"/>
+  <text x="672" y="1182" text-anchor="middle" class="tiny">Logging</text>
+
+  <path d="M742 1150l42 42m0-42-42 42m10-40 8-8 14 14-8 8m-12 14 8-8" class="icon-purple"/>
+  <text x="842" y="1182" text-anchor="middle" class="tiny">Utilities</text>
+
+  <path d="M930 1168h60m-30-22v22m-40 0v26m40-26v26m40-26v26m-88 0h32m32 0h32" class="icon-purple"/>
+  <text x="1032" y="1182" text-anchor="middle" class="tiny">Data Models</text>
+</svg>
