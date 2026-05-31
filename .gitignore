@@ -1,4 +1,46 @@
+# Python
 __pycache__/
 *.py[cod]
-infrastructure/vector-db/data/
-infrastructure/vector-db/test-data*/
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Node / Vite
+node_modules/
+dist/
+dist-ssr/
+.vite/
+
+# Logs and runtime output
+logs/
+*.log
+*.out
+*.err
+z_logs/
+
+# Local API/test payloads
+body.json
+
+# Local documentation drafts
+ARCHITECTURE.md
+
+# Local vector database data
+qdrant_data/
+infrastructure/vector_db/data/
+infrastructure/vector_db/test-data*/
+
+# Local Kubernetes secrets
+k8s/secrets/
+
+# Archives and local bundles
+*.zip
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
